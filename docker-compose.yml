@@ -1,0 +1,21 @@
+services:
+  database:
+    image: postgres:15-alpine
+    container_name: task-database
+    environment:
+      POSTGRES_DB: taskdb
+      POSTGRES_PASSWORD: taskpass
+      POSTGRES_USER: taskuser
+    ports:
+      - "5440:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

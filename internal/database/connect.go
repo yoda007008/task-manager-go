@@ -1,0 +1,21 @@
+package database
+
+import (
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+)
+
+func Connect(databaseUrl string) *sqlx.DB {
+	db, err := sqlx.Connect("postgres", databaseUrl)
+
+	if err != nil {
+		fmt.Errorf("Ошибка подключения к базе данных %w", err)
+	}
+
+	db.SetMaxOpenConns(25) // максимальное кол-во открытых соединений
+	db.SetMaxIdleConns(5)  // максимальное кол-во простаивающих соединений
+
+	return db
+}

@@ -48,12 +48,14 @@ func (t *TaskHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Получен невалидный id")
+		respondWithError(w, http.StatusBadRequest, "Некорректный ID задачи")
+		return
 	}
 
 	task, err := t.store.GetByID(id)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, task)
@@ -66,23 +68,60 @@ func (t *TaskHandlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&input) // декодируем тело запроса и вставляем в структуру input
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Некорректные данные запроса")
+		return
 	}
 
-	// todo validation to title
 	if strings.TrimSpace(input.Title) == "" {
 		respondWithError(w, http.StatusBadRequest, "Заголовок к задаче обязателен")
+		return
 	}
 
 	task, err := t.store.Create(input)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Ошибка создания задачи")
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, task)
 }
 
+// endpoint PUT /tasks/{id}
 func (t *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
-	// todo
+	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/tasks/"), "/")
+	idStr := pathParts[0]
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Некорректный ID задачи")
+		return
+	}
+
+	var input models.UpdateTaskInput
+
+	err = json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Некорректные данные запроса")
+		return
+	}
+
+	// проверяем, что заголовок не пустой
+	if input.Title != nil && strings.TrimSpace(*input.Title) == "" {
+		respondWithError(w, http.StatusBadRequest, "Заголовок не может быть пустым")
+		return
+	}
+
+	task, err := t.store.Update(id, input)
+	if err != nil {
+		if strings.Contains(err.Error(), "не найдена") {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		} else {
+			respondWithError(w, http.StatusBadRequest, "Обновление задачи произошло некорректно")
+			return
+		}
+	}
+
+	respondWithJSON(w, http.StatusOK, task)
 }
 
 func (t *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {

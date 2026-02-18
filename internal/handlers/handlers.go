@@ -23,3 +23,23 @@ func respondWithJSON(w http.ResponseWriter, statusCode int, payload interface{})
 func respondWithError() {
 	// todo
 }
+
+func (t *TaskHandlers) GetAllTask(w http.ResponseWriter, r *http.Request) {
+	// todo
+}
+
+func (t *TaskHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
+	// todo
+}
+
+func (t *TaskHandlers) CreateTask(w http.ResponseWriter, r *http.Request) {
+	// todo
+}
+
+func (t *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
+	// todo
+}
+
+func (t *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
+	// todo
+}

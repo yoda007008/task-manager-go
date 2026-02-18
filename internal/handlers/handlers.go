@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -114,16 +115,36 @@ func (t *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if strings.Contains(err.Error(), "не найдена") {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
 		} else {
 			respondWithError(w, http.StatusBadRequest, "Обновление задачи произошло некорректно")
-			return
 		}
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, task)
 }
 
 func (t *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
-	// todo
+	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/tasks/"), "/")
+	idStr := pathParts[0]
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Некорректный ID задачи")
+		return
+	}
+
+	err = t.store.Delete(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "не найдена") {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		} else {
+			respondWithError(w, http.StatusBadRequest, "Удаление задачи произошло некорректно")
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]string{
+		"message": fmt.Sprintf("Задача с ID %d успешно удалена", id),
+	})
 }

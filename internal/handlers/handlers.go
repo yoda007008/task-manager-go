@@ -124,6 +124,7 @@ func (t *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, task)
 }
 
+// endpoint DELETE /task/{id}
 func (t *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/tasks/"), "/")
 	idStr := pathParts[0]

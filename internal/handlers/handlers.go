@@ -11,7 +11,13 @@ import (
 )
 
 type TaskHandlers struct {
-	store database.TaskStore
+	store *database.TaskStore
+}
+
+func NewTaskHandler(store *database.TaskStore) *TaskHandlers {
+	return &TaskHandlers{
+		store: store,
+	}
 }
 
 func respondWithJSON(w http.ResponseWriter, statusCode int, payload interface{}) {

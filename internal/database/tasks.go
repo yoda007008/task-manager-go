@@ -10,10 +10,10 @@ import (
 )
 
 type TaskStore struct {
-	db sqlx.DB
+	db *sqlx.DB
 }
 
-func NewTaskStore(db sqlx.DB) *TaskStore {
+func NewTaskStore(db *sqlx.DB) *TaskStore {
 	return &TaskStore{
 		db: db,
 	}

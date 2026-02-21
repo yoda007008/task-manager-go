@@ -11,8 +11,7 @@ func Connect(databaseUrl string) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("postgres", databaseUrl)
 
 	if err != nil {
-
-		fmt.Errorf("Ошибка подключения к базе данных %w", err)
+		return nil, fmt.Errorf("Ошибка подключения к базе данных %w", err)
 	}
 
 	db.SetMaxOpenConns(25) // максимальное кол-во открытых соединений

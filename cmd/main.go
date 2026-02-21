@@ -18,7 +18,7 @@ func main() {
 
 	serverPort := os.Getenv("SERVER_PORT")
 	if serverPort == "" {
-		serverPort = "8080"
+		serverPort = ":8080"
 	}
 
 	slog.Info("Запуск приложения TaskManagerAPI...")
@@ -53,7 +53,7 @@ func main() {
 	slog.Info("  PUT    /tasks/{id}  - Обновить задачу")
 	slog.Info("  DELETE /tasks/{id}  - Удалить задачу")
 
-	err = http.ListenAndServe(":"+serverPort, corsHandler)
+	err = http.ListenAndServe(serverPort, corsHandler)
 	if err != nil {
 		slog.Error("Ошибка запуска сервера", err)
 	}

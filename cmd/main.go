@@ -7,6 +7,7 @@ import (
 	"os"
 	"task-manager-go/internal/database"
 	"task-manager-go/internal/handlers"
+	"task-manager-go/internal/middleware"
 )
 
 func main() {
@@ -42,8 +43,8 @@ func main() {
 	mux.HandleFunc("/tasks/create", methodHandler(handler.CreateTask, "POST"))
 	mux.HandleFunc("/tasks/", taskIDHandler(handler))
 
-	loggerMux := loggingMiddleware(mux)
-	corsHandler := corsMiddleware(loggerMux) // если фронтенд приложение работает на другом домене, то добавляем CORS
+	loggerMux := middleware.LoggingMiddleware(mux)
+	corsHandler := middleware.CorsMiddleware(loggerMux) // если фронтенд приложение работает на другом домене, то добавляем CORS
 
 	log.Printf("Сервер запущен на порту %s", serverPort)
 	slog.Info("Доступные endpoints: ")
@@ -84,42 +85,4 @@ func taskIDHandler(handler *handlers.TaskHandlers) http.HandlerFunc {
 			http.Error(w, "Метод не разрешен", http.StatusBadRequest)
 		}
 	}
-}
-
-// todo регистрируем middleware, который будет логировать все http запросы
-func loggingMiddleware(next http.Handler) http.Handler { // todo перенести в отдельную директорию /internal/middleware
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
-		// Пояснение:
-		// r.Method - HTTP метод (GET, POST, и т.д.)
-		// r.URL.Path - путь запроса (/tasks, /tasks/1, и т.д.)
-		// r.RemoteAddr - IP адрес клиента
-		next.ServeHTTP(w, r)
-	})
-}
-
-// эта функция, которая поможет интегрироваться с фронтом при помощи CORS
-// CORS позволяет браузерам отправлять запросы к API с других доменов
-func corsMiddleware(next http.Handler) http.Handler { // todo перенести в отдельную директорию
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// разрешаем запросы с других доменов
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-
-		// Access-Control-Allow-Methods - разрешенные HTTP методы
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-
-		// Access-Control-Allow-Headers - разрешенные заголовки в запросе
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-		// Обрабатываем preflight запрос
-		// Браузеры отправляют OPTIONS запрос перед основным запросом для проверки CORS
-		if r.Method == "OPTIONS" {
-			// Отвечаем статусом 200 и завершаем обработку
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		// Вызываем следующий обработчик
-		next.ServeHTTP(w, r)
-	})
 }

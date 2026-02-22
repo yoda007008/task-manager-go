@@ -56,6 +56,7 @@ func main() {
 	slog.Info("  PUT    /tasks/{id}  - Обновить задачу")
 	slog.Info("  DELETE /tasks/{id}  - Удалить задачу")
 
+	// todo graceful shutdown
 	err = http.ListenAndServe(serverPort, corsHandler)
 	if err != nil {
 		slog.Error("Ошибка запуска сервера", err)

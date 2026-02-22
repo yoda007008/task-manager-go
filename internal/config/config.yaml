@@ -1,0 +1,6 @@
+server:
+  port:
+    ":8080"
+
+database:
+  url: "postgresql://taskuser:taskpass@localhost:5440/taskdb?sslmode=disable"

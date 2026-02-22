@@ -39,9 +39,9 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/tasks", methodHandler(handler.GetAllTask, "GET"))
-	mux.HandleFunc("/tasks/create", methodHandler(handler.CreateTask, "POST"))
-	mux.HandleFunc("/tasks/", taskIDHandler(handler))
+	mux.HandleFunc("/tasks", handlers.MethodHandler(handler.GetAllTask, "GET"))
+	mux.HandleFunc("/tasks/create", handlers.MethodHandler(handler.CreateTask, "POST"))
+	mux.HandleFunc("/tasks/", handlers.TaskIDHandler(handler))
 
 	loggerMux := middleware.LoggingMiddleware(mux)
 	corsHandler := middleware.CorsMiddleware(loggerMux) // если фронтенд приложение работает на другом домене, то добавляем CORS
@@ -57,32 +57,5 @@ func main() {
 	err = http.ListenAndServe(serverPort, corsHandler)
 	if err != nil {
 		slog.Error("Ошибка запуска сервера", err)
-	}
-}
-
-// функция helper для проверки http метода
-func methodHandler(handlerFunc http.HandlerFunc, allowedMethod string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != allowedMethod {
-			http.Error(w, "Метод не разрешен", http.StatusBadRequest)
-			return
-		}
-		handlerFunc(w, r)
-	}
-}
-
-// специальный обработчик методов, которые имеют ID задачи
-func taskIDHandler(handler *handlers.TaskHandlers) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			handler.GetTask(w, r)
-		case http.MethodPut:
-			handler.UpdateTask(w, r)
-		case http.MethodDelete:
-			handler.DeleteTask(w, r)
-		default:
-			http.Error(w, "Метод не разрешен", http.StatusBadRequest)
-		}
 	}
 }

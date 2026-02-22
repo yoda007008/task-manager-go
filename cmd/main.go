@@ -1,26 +1,28 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"log/slog"
 	"net/http"
-	"os"
+	"task-manager-go/internal/config"
 	"task-manager-go/internal/database"
 	"task-manager-go/internal/handlers"
 	"task-manager-go/internal/middleware"
 )
 
 func main() {
-	// todo run service with graceful shutdown
-	databaseURL := os.Getenv("DATABASE_URL") // todo make directory config and parse config
-	if databaseURL == "" {
-		databaseURL = "postgresql://taskuser:taskpass@localhost:5440/taskdb?sslmode=disable"
+	configPath := flag.String("config", "/home/kirill/GolandProjects/task-manager-go/internal/config/config.yaml", "path to config file") // config
+
+	flag.Parse()
+
+	cfg, err := config.LoadConfig(*configPath)
+	if err != nil {
+		slog.Error("Error parse config", "error", err)
 	}
 
-	serverPort := os.Getenv("SERVER_PORT")
-	if serverPort == "" {
-		serverPort = ":8080"
-	}
+	databaseURL := cfg.Database.Url
+	serverPort := cfg.Server.Port
 
 	slog.Info("Запуск приложения TaskManagerAPI...")
 

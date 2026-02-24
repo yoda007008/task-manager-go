@@ -1,14 +1,20 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"task-manager-go/internal/config"
 	"task-manager-go/internal/database"
 	"task-manager-go/internal/handlers"
 	"task-manager-go/internal/middleware"
+	"time"
 )
 
 func main() {
@@ -48,6 +54,24 @@ func main() {
 	loggerMux := middleware.LoggingMiddleware(mux)
 	corsHandler := middleware.CorsMiddleware(loggerMux) // если фронтенд приложение работает на другом домене, то добавляем CORS
 
+	server := &http.Server{
+		Addr:    serverPort,
+		Handler: corsHandler,
+	}
+
+	var wg sync.WaitGroup
+	upperCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err = server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			slog.Error("Ошибка запуска сервера", err)
+		}
+	}()
+
 	log.Printf("Сервер запущен на порту %s", serverPort)
 	slog.Info("Доступные endpoints: ")
 	slog.Info("  GET 	 /tasks - получить все задачи")
@@ -56,9 +80,17 @@ func main() {
 	slog.Info("  PUT    /tasks/{id}  - Обновить задачу")
 	slog.Info("  DELETE /tasks/{id}  - Удалить задачу")
 
-	// todo graceful shutdown
-	err = http.ListenAndServe(serverPort, corsHandler)
-	if err != nil {
-		slog.Error("Ошибка запуска сервера", err)
+	<-upperCtx.Done()
+
+	slog.Info("Остановка task-manager-go")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	if err = server.Shutdown(shutdownCtx); err != nil {
+		slog.Error("Ошибка при Graceful Shutdown", "error", err)
 	}
+
+	slog.Info("Успешный Graceful Shutdown")
+
+	wg.Wait()
 }

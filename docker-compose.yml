@@ -1,4 +1,18 @@
 services:
+  task-manager:
+    container_name: task-manager
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    environment:
+      - CONFIG_PATH=/app/internal/config.yaml
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
   database:
     image: postgres:15-alpine
     container_name: task-database
@@ -15,6 +29,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - backend
 
 volumes:
   postgres_data:
+
+networks:
+  backend:

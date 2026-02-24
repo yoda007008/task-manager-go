@@ -18,13 +18,13 @@ import (
 )
 
 func main() {
-	configPath := flag.String("config", "/home/kirill/GolandProjects/task-manager-go/internal/config/config.yaml", "path to config file") // config
+	configPath := flag.String("config", "./internal/config/config.yaml", "path to config file") // config
 
 	flag.Parse()
 
 	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
-		slog.Error("Error parse config", "error", err)
+		slog.Error("Ошибка парсинга конфига", "error", err)
 	}
 
 	databaseURL := cfg.Database.Url
@@ -35,6 +35,7 @@ func main() {
 	db, err := database.Connect(databaseURL)
 	if err != nil {
 		slog.Error("Ошибка подключения к базе", err)
+		os.Exit(1)
 	}
 
 	defer db.Close()

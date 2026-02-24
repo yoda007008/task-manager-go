@@ -3,4 +3,4 @@ server:
     ":8080"
 
 database:
-  url: "postgresql://taskuser:taskpass@localhost:5440/taskdb?sslmode=disable"
+  url: "postgresql://taskuser:taskpass@database:5432/taskdb?sslmode=disable"

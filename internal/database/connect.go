@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -12,6 +13,7 @@ func Connect(databaseUrl string) (*sqlx.DB, error) {
 
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка подключения к базе данных %w", err)
+		os.Exit(1)
 	}
 
 	db.SetMaxOpenConns(25) // максимальное кол-во открытых соединений

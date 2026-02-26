@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -11,7 +10,7 @@ import (
 
 type Config struct {
 	Database struct {
-		Url string `mapstructure:"url"`
+		URL string `mapstructure:"url"`
 	} `mapstructure:"database"`
 	Server struct {
 		Port string `mapstructure:"port"`
@@ -21,7 +20,7 @@ type Config struct {
 func LoadConfig(path string) (Config, error) {
 	var config Config
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return config, fmt.Errorf("read config file %w", err)
 	}

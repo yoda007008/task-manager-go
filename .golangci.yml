@@ -1,0 +1,11 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - gofmt
+    - revive
+    - staticcheck
+  disable:
+    - unused
+    - goimports

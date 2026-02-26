@@ -27,7 +27,10 @@ func respondWithJSON(w http.ResponseWriter, statusCode int, payload interface{})
 
 	w.WriteHeader(statusCode)
 
-	json.NewEncoder(w).Encode(payload) // создаем новый Encoder, который пишет в ResponseWriter, Encode преобразует поле в jsonи отправляет ответ
+	err := json.NewEncoder(w).Encode(payload) // создаем новый Encoder, который пишет в ResponseWriter, Encode преобразует поле в jsonи отправляет ответ
+	if err != nil {
+		return
+	}
 }
 
 func respondWithError(w http.ResponseWriter, statusCode int, message string) {
@@ -35,7 +38,7 @@ func respondWithError(w http.ResponseWriter, statusCode int, message string) {
 }
 
 // endpoint GET /tasks
-func (t *TaskHandlers) GetAllTask(w http.ResponseWriter, r *http.Request) {
+func (t *TaskHandlers) GetAllTask(w http.ResponseWriter, _ *http.Request) {
 	task, err := t.store.GetAll()
 
 	if err != nil {

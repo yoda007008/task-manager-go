@@ -2,18 +2,18 @@ package database
 
 import (
 	"fmt"
-	"os"
+	//"os"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // Postgres driver
 )
 
-func Connect(databaseUrl string) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("postgres", databaseUrl)
+func Connect(databaseURL string) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("postgres", databaseURL)
 
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка подключения к базе данных %w", err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 
 	db.SetMaxOpenConns(25) // максимальное кол-во открытых соединений

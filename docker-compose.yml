@@ -5,7 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     environment:
       - CONFIG_PATH=/app/internal/config.yaml
     ports:

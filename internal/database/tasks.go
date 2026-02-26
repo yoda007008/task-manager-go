@@ -46,7 +46,7 @@ func (t *TaskStore) GetByID(id int) (*models.Task, error) {
 	err := t.db.Get(&task, query, id) // выполняет запрос и заполняет одну структуру
 
 	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("задача с id %s не найдена", id)
+		return nil, fmt.Errorf("задача с id %d не найдена", id)
 	}
 
 	if err != nil {
@@ -119,7 +119,7 @@ func (t *TaskStore) Update(id int, input models.UpdateTaskInput) (*models.Task, 
 	).StructScan(&updatedTask)
 
 	if err != nil {
-		return nil, fmt.Errorf("ошибка обновления задачи", err)
+		return nil, fmt.Errorf("ошибка обновления задачи %w", err)
 	}
 
 	return &updatedTask, nil
@@ -135,17 +135,17 @@ func (t *TaskStore) Delete(id int) error {
 	result, err := t.db.Exec(query, id) // функция Exeс выполняет запрос, не возвращая ни одной строки
 
 	if err != nil {
-		return fmt.Errorf("ошибка проверки результата удаления задачи", err)
+		return fmt.Errorf("ошибка проверки результата удаления задачи %w", err)
 	}
 
 	// RowsAffected возвращает кол-во затронутых (удаленных) строк
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("ошибка проверки удаления", err)
+		return fmt.Errorf("ошибка проверки удаления %w", err)
 	}
 
 	if rowsAffected == 0 {
-		fmt.Errorf("задача с id %d не найдена", id)
+		return fmt.Errorf("задача с id %d не найдена", id)
 	}
 
 	return nil

@@ -27,14 +27,14 @@ func main() {
 		slog.Error("Ошибка парсинга конфига", "error", err)
 	}
 
-	databaseURL := cfg.Database.Url
+	databaseURL := cfg.Database.URL
 	serverPort := cfg.Server.Port
 
 	slog.Info("Запуск приложения TaskManagerAPI...")
 
 	db, err := database.Connect(databaseURL)
 	if err != nil {
-		slog.Error("Ошибка подключения к базе", err)
+		slog.Error("Ошибка подключения к базе", "error", err)
 		os.Exit(1)
 	}
 
@@ -69,7 +69,7 @@ func main() {
 		defer wg.Done()
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			slog.Error("Ошибка запуска сервера", err)
+			slog.Error("Ошибка запуска сервера", "error", err)
 		}
 	}()
 

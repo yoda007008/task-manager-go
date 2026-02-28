@@ -22,25 +22,31 @@ func main() {
 
 	flag.Parse()
 
+	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+
+	logger := slog.New(logHandler).With("task-manager", "database")
+
 	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
-		slog.Error("Ошибка парсинга конфига", "error", err)
+		logger.Error("Ошибка парсинга конфига", "error", err)
 	}
 
 	databaseURL := cfg.Database.URL
 	serverPort := cfg.Server.Port
 
-	slog.Info("Запуск приложения TaskManagerAPI...")
+	logger.Info("Запуск приложения TaskManagerAPI...")
 
 	db, err := database.Connect(databaseURL)
 	if err != nil {
-		slog.Error("Ошибка подключения к базе", "error", err)
+		logger.Error("Ошибка подключения к базе", "error", err)
 		os.Exit(1)
 	}
 
 	defer db.Close()
 
-	slog.Info("Успешное подключение к базе...")
+	logger.Info("Успешное подключение к базе...")
 
 	taskStore := database.NewTaskStore(db)
 
@@ -69,29 +75,29 @@ func main() {
 		defer wg.Done()
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			slog.Error("Ошибка запуска сервера", "error", err)
+			logger.Error("Ошибка запуска сервера", "error", err)
 		}
 	}()
 
 	log.Printf("Сервер запущен на порту %s", serverPort)
-	slog.Info("Доступные endpoints: ")
-	slog.Info("  GET 	 /tasks - получить все задачи")
-	slog.Info("  GET    /tasks/{id}  - Получить задачу по ID")
-	slog.Info("  POST   /tasks/create - Создать новую задачу")
-	slog.Info("  PUT    /tasks/{id}  - Обновить задачу")
-	slog.Info("  DELETE /tasks/{id}  - Удалить задачу")
+	logger.Info("Доступные endpoints: ")
+	logger.Info("  GET 	 /tasks - получить все задачи")
+	logger.Info("  GET    /tasks/{id}  - Получить задачу по ID")
+	logger.Info("  POST   /tasks/create - Создать новую задачу")
+	logger.Info("  PUT    /tasks/{id}  - Обновить задачу")
+	logger.Info("  DELETE /tasks/{id}  - Удалить задачу")
 
 	<-upperCtx.Done()
 
-	slog.Info("Остановка task-manager-go")
+	logger.Info("Остановка task-manager-go")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	if err = server.Shutdown(shutdownCtx); err != nil {
-		slog.Error("Ошибка при Graceful Shutdown", "error", err)
+		logger.Error("Ошибка при Graceful Shutdown", "error", err)
 	}
 
-	slog.Info("Успешный Graceful Shutdown")
+	logger.Info("Успешный Graceful Shutdown")
 
 	wg.Wait()
 }

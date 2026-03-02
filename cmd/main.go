@@ -13,8 +13,11 @@ import (
 	"task-manager-go/internal/config"
 	"task-manager-go/internal/database"
 	"task-manager-go/internal/handlers"
+	"task-manager-go/internal/metrics"
 	"task-manager-go/internal/middleware"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -57,9 +60,13 @@ func main() {
 	mux.HandleFunc("/tasks", handlers.MethodHandler(handler.GetAllTask, "GET"))
 	mux.HandleFunc("/tasks/create", handlers.MethodHandler(handler.CreateTask, "POST"))
 	mux.HandleFunc("/tasks/", handlers.TaskIDHandler(handler))
+	mux.Handle("/metrics", promhttp.Handler())
 
 	loggerMux := middleware.LoggingMiddleware(mux)
 	corsHandler := middleware.CorsMiddleware(loggerMux) // если фронтенд приложение работает на другом домене, то добавляем CORS
+
+	logger.Info("Инициализация Prometheus...")
+	metrics.InitPrometheus()
 
 	server := &http.Server{
 		Addr:    serverPort,

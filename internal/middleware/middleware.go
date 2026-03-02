@@ -3,6 +3,9 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"task-manager-go/internal/metrics"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // регистрируем middleware, который будет логировать все http запросы
@@ -39,6 +42,20 @@ func CorsMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Вызываем следующий обработчик
+		next.ServeHTTP(w, r)
+	})
+}
+
+func MetricsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// todo Считаем запросы
+		metrics.TaskManagerMetrics.RequestsTotal.WithLabelValues(r.Method, r.URL.Path).Inc()
+
+		// todo Замеряем время
+		timer := prometheus.NewTimer(metrics.TaskManagerMetrics.RequestsDuration.WithLabelValues(r.Method, r.URL.Path))
+		defer timer.ObserveDuration()
+
+		// todo Выполняем запрос
 		next.ServeHTTP(w, r)
 	})
 }

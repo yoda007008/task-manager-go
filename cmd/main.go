@@ -62,7 +62,8 @@ func main() {
 	mux.HandleFunc("/tasks/", handlers.TaskIDHandler(handler))
 	mux.Handle("/metrics", promhttp.Handler())
 
-	loggerMux := middleware.LoggingMiddleware(mux)
+	metricsMux := middleware.MetricsMiddleware(mux)
+	loggerMux := middleware.LoggingMiddleware(metricsMux)
 	corsHandler := middleware.CorsMiddleware(loggerMux) // если фронтенд приложение работает на другом домене, то добавляем CORS
 
 	logger.Info("Инициализация Prometheus...")

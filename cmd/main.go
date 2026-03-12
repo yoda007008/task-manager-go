@@ -15,6 +15,7 @@ import (
 	"task-manager-go/internal/handlers"
 	"task-manager-go/internal/metrics"
 	"task-manager-go/internal/middleware"
+	repository "task-manager-go/internal/repository"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -51,7 +52,7 @@ func main() {
 
 	logger.Info("Успешное подключение к базе...")
 
-	taskStore := database.NewTaskStore(db)
+	taskStore := repository.NewTaskStore(db)
 
 	handler := handlers.NewTaskHandler(taskStore)
 

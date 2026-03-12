@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"task-manager-go/internal/database"
 	"task-manager-go/internal/models"
+	repository "task-manager-go/internal/repository"
 )
 
 type TaskHandlers struct {
-	store *database.TaskStore
+	store *repository.TaskStore
 }
 
-func NewTaskHandler(store *database.TaskStore) *TaskHandlers {
+func NewTaskHandler(store *repository.TaskStore) *TaskHandlers {
 	return &TaskHandlers{
 		store: store,
 	}

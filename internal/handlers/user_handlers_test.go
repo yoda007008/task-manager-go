@@ -1,10 +1,8 @@
-package database
+package handlers
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestUserHandlers_GetAll(t *testing.T) {
+func TestTaskHandlers_GetAllTask(t *testing.T) {
 	// todo testing
 }
 

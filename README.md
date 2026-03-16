@@ -6,7 +6,14 @@ RestAPI написанный на Golang с ручками для взаимод
 Docker с установкой всех зависимостей. Добавлен также 
 мониторинг Prometheus + Grafana. 
 
-// todo Добавить тесты (testify)
+Также имеются корректные моки для тестирования
+их можно сгенерировать через mockgen этой командой:
+
+```plaintext
+mockery --name=TaskService --dir=./domain --output=./mocks --outpkg=mocks
+```
+
+// todo Доделать тесты (gomock lib)
 
 ## Ручки с примерами запросов
 1) http://localhost:8080/tasks - получаем все задачи

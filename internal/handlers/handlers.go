@@ -6,17 +6,18 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"task-manager-go/domain"
 	"task-manager-go/internal/models"
-	repository "task-manager-go/internal/repository"
 )
 
 type TaskHandlers struct {
-	store *repository.TaskStore
+	//store *repository.TaskStore
+	repo domain.TaskService
 }
 
-func NewTaskHandler(store *repository.TaskStore) *TaskHandlers {
+func NewTaskHandler(repo domain.TaskService) *TaskHandlers {
 	return &TaskHandlers{
-		store: store,
+		repo: repo,
 	}
 }
 
@@ -38,8 +39,8 @@ func respondWithError(w http.ResponseWriter, statusCode int, message string) {
 }
 
 // endpoint GET /tasks
-func (t *TaskHandlers) GetAllTask(w http.ResponseWriter, _ *http.Request) {
-	task, err := t.store.GetAll()
+func (t *TaskHandlers) GetAllTask(w http.ResponseWriter, r *http.Request) {
+	task, err := t.repo.GetAll()
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка получения задач")
@@ -62,7 +63,7 @@ func (t *TaskHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := t.store.GetByID(id)
+	task, err := t.repo.GetByID(id)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -86,7 +87,7 @@ func (t *TaskHandlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := t.store.Create(input)
+	task, err := t.repo.Create(input)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Ошибка создания задачи")
 		return
@@ -120,7 +121,7 @@ func (t *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := t.store.Update(id, input)
+	task, err := t.repo.Update(id, input)
 	if err != nil {
 		if strings.Contains(err.Error(), "не найдена") {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -144,7 +145,7 @@ func (t *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = t.store.Delete(id)
+	err = t.repo.Delete(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "не найдена") {
 			respondWithError(w, http.StatusInternalServerError, err.Error())

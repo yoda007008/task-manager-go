@@ -57,17 +57,56 @@ func TestTaskHandlers_GetAllTask(t *testing.T) {
 }
 
 func TestUserHandlers_GetByID(t *testing.T) {
-	// todo testing
+	mockRepo := mocks.NewTaskService(t)
+
+	handler := NewTaskHandler(mockRepo)
+
+	t.Run("success returning by id", func(t *testing.T) {
+		expectedTask := &models.Task{
+			ID:    1,
+			Title: "Test Test",
+		}
+
+		mockRepo.On("GetByID", 1).Return(expectedTask, nil).Once()
+
+		resp := httptest.NewRequest(http.MethodGet, "/tasks/1", nil)
+		w := httptest.NewRecorder()
+
+		handler.GetTask(w, resp)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
+
+		var response models.Task
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+
+		require.NoError(t, err)
+		assert.Equal(t, expectedTask.ID, response.ID)
+		assert.Equal(t, expectedTask.Title, response.Title)
+
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("not task in database", func(t *testing.T) {
+
+		resp := httptest.NewRequest(http.MethodGet, "/tasks", nil)
+		w := httptest.NewRecorder()
+
+		handler.GetTask(w, resp)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockRepo.AssertExpectations(t)
+	})
 }
 
-func TestUserHandlers_Create(t *testing.T) {
-	// todo testing
-}
-
-func TestUserHandlers_Update(t *testing.T) {
-	// todo testing
-}
-
-func TestUserHandlers_Delete(t *testing.T) {
-	// todo testing
-}
+//func TestUserHandlers_Create(t *testing.T) {
+//	// todo testing
+//}
+//
+//func TestUserHandlers_Update(t *testing.T) {
+//	// todo testing
+//}
+//
+//func TestUserHandlers_Delete(t *testing.T) {
+//	// todo testing
+//}

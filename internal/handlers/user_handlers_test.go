@@ -14,7 +14,6 @@ import (
 )
 
 func TestTaskHandlers_GetAllTask(t *testing.T) {
-	// todo testing
 	mockRepo := mocks.NewTaskService(t)
 
 	handler := NewTaskHandler(mockRepo)

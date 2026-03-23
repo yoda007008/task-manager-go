@@ -18,7 +18,7 @@ func TestTaskHandlers_GetAllTask(t *testing.T) {
 
 	handler := NewTaskHandler(mockRepo)
 
-	t.Run("success returning tasks", func(t *testing.T) {
+	t.Run("success returning tasks, status 200", func(t *testing.T) {
 		expectedTasks := []models.Task{
 			{ID: 1, Title: "Task 1", Completed: false},
 			{ID: 2, Title: "Task 2", Completed: true},
@@ -43,7 +43,7 @@ func TestTaskHandlers_GetAllTask(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("returning error", func(t *testing.T) {
+	t.Run("returning internal server error status code 500", func(t *testing.T) {
 		mockRepo.On("GetAll").Return(nil, errors.New("db error")).Once()
 
 		req := httptest.NewRequest(http.MethodGet, "/tasks", nil)
@@ -61,7 +61,7 @@ func TestUserHandlers_GetByID(t *testing.T) {
 
 	handler := NewTaskHandler(mockRepo)
 
-	t.Run("success returning by id", func(t *testing.T) {
+	t.Run("success returning by id status 200", func(t *testing.T) {
 		expectedTask := &models.Task{
 			ID:    1,
 			Title: "Test Test",
@@ -87,8 +87,7 @@ func TestUserHandlers_GetByID(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("not task in database", func(t *testing.T) {
-
+	t.Run("not task in database returning status 400", func(t *testing.T) {
 		resp := httptest.NewRequest(http.MethodGet, "/tasks", nil)
 		w := httptest.NewRecorder()
 
@@ -102,7 +101,6 @@ func TestUserHandlers_GetByID(t *testing.T) {
 //func TestUserHandlers_Create(t *testing.T) {
 //	// todo testing
 //}
-//
 //func TestUserHandlers_Update(t *testing.T) {
 //	// todo testing
 //}

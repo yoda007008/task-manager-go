@@ -154,10 +154,30 @@ func TestUserHandlers_Create(t *testing.T) {
 	})
 }
 
-//func TestUserHandlers_Update(t *testing.T) {
-//	// todo testing
-//}
-//
+func TestUserHandlers_Update(t *testing.T) {
+	// todo testing
+	//mockRepo := mocks.NewTaskService(t)
+	//
+	//handler := NewTaskHandler(mockRepo)
+	//
+	//var title *string
+	//var description *string
+	//var completed *bool
+	//
+	//t.Run("success update task, status 200", func(t *testing.T) {
+	//	input := models.UpdateTaskInput{
+	//		Title:       title,
+	//		Description: description,
+	//		Completed:   completed,
+	//	}
+	//
+	//	body, err := json.Marshal(input)
+	//	require.NoError(t, err)
+	//
+	//	resp := httptest.NewRequest(http.MethodPut, "/tasks/", bytes.NewReader(body))
+	//})
+}
+
 //func TestUserHandlers_Delete(t *testing.T) {
 //	// todo testing
 //}

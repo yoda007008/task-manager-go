@@ -228,7 +228,7 @@ func TestUserHandlers_Update(t *testing.T) {
 		mockRepo.AssertNotCalled(t, "Update")
 	})
 
-	t.Run("empty title after trim - returns 400", func(t *testing.T) {
+	t.Run("empty title after trim, returns 400", func(t *testing.T) {
 		emptyTitle := "   "
 		input := models.UpdateTaskInput{
 			Title: &emptyTitle,

@@ -156,26 +156,100 @@ func TestUserHandlers_Create(t *testing.T) {
 
 func TestUserHandlers_Update(t *testing.T) {
 	// todo testing
-	//mockRepo := mocks.NewTaskService(t)
-	//
-	//handler := NewTaskHandler(mockRepo)
-	//
-	//var title *string
-	//var description *string
-	//var completed *bool
-	//
-	//t.Run("success update task, status 200", func(t *testing.T) {
-	//	input := models.UpdateTaskInput{
-	//		Title:       title,
-	//		Description: description,
-	//		Completed:   completed,
-	//	}
-	//
-	//	body, err := json.Marshal(input)
-	//	require.NoError(t, err)
-	//
-	//	resp := httptest.NewRequest(http.MethodPut, "/tasks/", bytes.NewReader(body))
-	//})
+	mockRepo := mocks.NewTaskService(t)
+
+	handler := NewTaskHandler(mockRepo)
+
+	newTitle := "New title"
+	newDescription := "New description"
+	newCompleted := true
+
+	t.Run("success update task, status 200", func(t *testing.T) {
+		input := models.UpdateTaskInput{
+			Title:       &newTitle,
+			Description: &newDescription,
+			Completed:   &newCompleted,
+		}
+
+		expectedTask := &models.Task{
+			ID:          1,
+			Title:       newTitle,
+			Description: newDescription,
+			Completed:   newCompleted,
+		}
+
+		body, err := json.Marshal(input)
+		require.NoError(t, err)
+
+		mockRepo.On("Update", 1, input).Return(expectedTask, nil).Once()
+
+		resp := httptest.NewRequest(http.MethodPut, "/tasks/1", bytes.NewReader(body))
+
+		resp.Header.Set("Content-Type", "application/json")
+
+		w := httptest.NewRecorder()
+
+		handler.UpdateTask(w, resp)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
+
+		var response models.Task
+		err = json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+
+		assert.Equal(t, expectedTask.ID, response.ID)
+		assert.Equal(t, expectedTask.Title, response.Title)
+		assert.Equal(t, expectedTask.Description, response.Description)
+		assert.Equal(t, expectedTask.Completed, response.Completed)
+
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("not success update task, status 400", func(t *testing.T) {
+		input := models.UpdateTaskInput{
+			Title: &newTitle,
+		}
+
+		body, _ := json.Marshal(input)
+
+		req := httptest.NewRequest(http.MethodPut, "/tasks/abc", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		handler.UpdateTask(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var errResponse map[string]string
+		json.Unmarshal(w.Body.Bytes(), &errResponse)
+		assert.Contains(t, errResponse["error"], "Некорректный ID")
+
+		mockRepo.AssertNotCalled(t, "Update")
+	})
+
+	t.Run("empty title after trim - returns 400", func(t *testing.T) {
+		emptyTitle := "   "
+		input := models.UpdateTaskInput{
+			Title: &emptyTitle,
+		}
+
+		body, _ := json.Marshal(input)
+
+		req := httptest.NewRequest(http.MethodPut, "/tasks/1", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		handler.UpdateTask(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var errResponse map[string]string
+		json.Unmarshal(w.Body.Bytes(), &errResponse)
+		assert.Contains(t, errResponse["error"], "Заголовок не может быть пустым")
+
+		mockRepo.AssertNotCalled(t, "Update")
+	})
 }
 
 //func TestUserHandlers_Delete(t *testing.T) {

@@ -252,8 +252,6 @@ func TestUserHandlers_Update(t *testing.T) {
 }
 
 func TestUserHandlers_Delete(t *testing.T) {
-	// todo testing
-
 	mockRepo := mocks.NewTaskService(t)
 
 	handler := NewTaskHandler(mockRepo)

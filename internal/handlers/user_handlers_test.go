@@ -251,6 +251,63 @@ func TestUserHandlers_Update(t *testing.T) {
 	})
 }
 
-//func TestUserHandlers_Delete(t *testing.T) {
-//	// todo testing
-//}
+func TestUserHandlers_Delete(t *testing.T) {
+	// todo testing
+
+	mockRepo := mocks.NewTaskService(t)
+
+	handler := NewTaskHandler(mockRepo)
+
+	t.Run("success delete task task, status 200", func(t *testing.T) {
+		mockRepo.On("Delete", 1).Return(nil).Once()
+
+		req := httptest.NewRequest(http.MethodDelete, "/tasks/1", nil)
+		w := httptest.NewRecorder()
+
+		handler.DeleteTask(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
+
+		var response map[string]string
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+
+		assert.Contains(t, response["message"], "успешно удалена")
+		assert.Contains(t, response["message"], "1")
+
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("not found task for delete, status 500", func(t *testing.T) {
+		mockRepo.On("Delete", 999).Return(errors.New("задача с id 999 не найдена")).Once()
+
+		req := httptest.NewRequest(http.MethodDelete, "/tasks/999", nil)
+		w := httptest.NewRecorder()
+
+		handler.DeleteTask(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Contains(t, response["error"], "не найдена")
+
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("negative ID, status 400", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodDelete, "/tasks/-5", nil)
+		w := httptest.NewRecorder()
+
+		handler.DeleteTask(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Contains(t, response["error"], "Отрицательный ID не принимается")
+
+		mockRepo.AssertNotCalled(t, "Delete")
+	})
+}

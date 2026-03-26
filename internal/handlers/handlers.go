@@ -145,6 +145,11 @@ func (t *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if id < 0 {
+		respondWithError(w, http.StatusBadRequest, "Отрицательный ID не принимается")
+		return
+	}
+
 	err = t.repo.Delete(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "не найдена") {
